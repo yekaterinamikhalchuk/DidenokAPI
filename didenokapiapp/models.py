@@ -5,7 +5,7 @@ import uuid
 class ShopUnit(models.Model):
     OFFER = 'OFFER'
     CATEGORY = 'CATEGORY'
-    type_choices  = [
+    type_choices = [
         (OFFER, 'Offer'),
         (CATEGORY, 'Category'),
     ]

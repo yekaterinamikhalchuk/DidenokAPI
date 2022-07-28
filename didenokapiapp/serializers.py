@@ -15,4 +15,4 @@ class ShopUnitCreateSerializer(serializers.Serializer):
     class Meta:
 
         model = ShopUnit
-        fields = ('id', 'name', 'parentId', 'price', 'type')
+        fields = ('name', 'parentId', 'price', 'type')
