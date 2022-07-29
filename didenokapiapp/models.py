@@ -15,7 +15,7 @@ class ShopUnit(models.Model):
     date = models.CharField(null=False, max_length=255)
     type = models.CharField(max_length=8, choices=type_choices, null=False)
     parentId = models.UUIDField(primary_key=False, null=True, editable=False)
-    price = models.IntegerField(null=True)
+    price = models.IntegerField(null=True, default=None)
     children = models.TextField(null=True)
 
 # Create your models here.
