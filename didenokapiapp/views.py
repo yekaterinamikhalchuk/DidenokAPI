@@ -28,22 +28,31 @@ class ShopUnitCreateView(APIView):
                     unit = ShopUnit(
                         name=inst.instance['name'],
                         type=inst.instance['type'],
-                        price=inst.instance['price'],
+                        price=int(inst.instance['price']),
                         parentId=inst.instance['parentId'],
                         date=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                     )
                     unit.save()
+
                     ShopUnit.objects.filter(
                         id=inst.instance['parentId']).update(
                         children=list(ShopUnit.objects.filter(
-                            parentId=inst.instance['parentId']).values()), price=
-                            numpy.average(ShopUnit.objects.filter(
-                                parentId=inst.instance['parentId'].filter(type="OFFER")).values_list('price')))
+                            parentId=inst.instance['parentId']).values()), price=numpy.average(
+                                ShopUnit.objects.filter(
+                                parentId=inst.instance['parentId']).values_list('price')))
+                    if ShopUnit.objects.filter(id=ShopUnit.objects.filter(
+                        id=inst.instance['parentId']).values_list('parentId', flat=True)[0]).values_list(
+                        'parentId', flat=True):
+                        ShopUnit.objects.filter(id=ShopUnit.objects.filter(
+                            id=inst.instance['parentId']).values_list('parentId', flat=True)[0]).update(children=list(ShopUnit.objects.filter(
+                            parentId=ShopUnit.objects.filter(id=inst.instance['parentId']).values_list('parentId', flat=True)[0]).values()), price=numpy.average(ShopUnit.objects.filter(
+                            parentId=ShopUnit.objects.filter(id=inst.instance['parentId']).values_list('parentId', flat=True)[0]).values_list('price', flat=True)))
+
                 else:
                     unit = ShopUnit(
                         name=inst.instance['name'],
                         type=inst.instance['type'],
-                        price=inst.instance['price'],
+                        price=int(inst.instance['price']),
                         date=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                     )
                     unit.save()
@@ -51,8 +60,7 @@ class ShopUnitCreateView(APIView):
                 raise ValidationError
 
         else:
-            if 'parentId' in inst.instance and ShopUnit.objects.filter(
-                    type="CATEGORY").get(id=inst.instance['parentId']):
+            if 'parentId' in inst.instance:
                 unit = ShopUnit(
                     name=inst.instance['name'],
                     type=inst.instance['type'],
@@ -60,19 +68,6 @@ class ShopUnitCreateView(APIView):
                     date=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 )
                 unit.save()
-                if numpy.average(ShopUnit.objects.filter(type="OFFER").filter(
-                            parentId=inst.instance['parentId']).values_list('price')) is not None:
-                    ShopUnit.objects.filter(
-                        id=inst.instance['parentId']).update(
-                        children=list(ShopUnit.objects.filter(
-                            parentId=inst.instance['parentId']).values()), price=
-                            numpy.average(ShopUnit.objects.filter(type="OFFER").filter(
-                                parentId=inst.instance['parentId']).values_list('price')))
-                else:
-                    ShopUnit.objects.filter(
-                        id=inst.instance['parentId']).update(
-                        children=list(ShopUnit.objects.filter(
-                            parentId=inst.instance['parentId']).values()), )
             else:
                 unit = ShopUnit(
                     name=inst.instance['name'],
@@ -80,21 +75,6 @@ class ShopUnitCreateView(APIView):
                     date=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 )
                 unit.save()
-
-            if ShopUnit.objects.filter(parentId=unit.id):
-                if numpy.average(ShopUnit.objects.filter(
-                        parentId=unit.id).filter(type="OFFER").values_list('price')) is not None:
-                    ShopUnit.objects.filter(
-                        id=unit.id).update(
-                        price=int(numpy.average(ShopUnit.objects.filter(
-                            parentId=unit.id).filter(type="OFFER").values_list('price'))),
-                        children=list(ShopUnit.objects.filter(
-                            parentId=unit.id).values()))
-                else:
-                    ShopUnit.objects.filter(
-                        id=unit.id).update(
-                        children=list(ShopUnit.objects.filter(
-                            parentId=unit.id).values()))
 
         return Response(status=201)
 # Create your views here.
